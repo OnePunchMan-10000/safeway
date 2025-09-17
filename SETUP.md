@@ -7,8 +7,21 @@
 #### Option A: MongoDB Atlas (Cloud - Recommended for quick setup)
 1. Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
 2. Create a free account
-3. Create a new cluster
-4. Get your connection string and replace the `MONGODB_URI` in `backend/.env`
+3. Create a new cluster (M0 free tier is sufficient)
+4. Configure database access:
+   - Go to "Database Access" in the left menu
+   - Add a new database user with read/write permissions
+5. Configure network access:
+   - Go to "Network Access" in the left menu
+   - Add your current IP address or allow access from anywhere (0.0.0.0/0)
+6. Get your connection string:
+   - Click "Connect" on your cluster
+   - Choose "Connect your application"
+   - Copy the connection string
+7. Update the [backend/.env](file:///g:/safeway/backend/.env) file:
+   ```
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/women-safety-app?retryWrites=true&w=majority
+   ```
 
 #### Option B: Local MongoDB Installation
 1. Download MongoDB Community Server from [MongoDB Download Center](https://www.mongodb.com/try/download/community)
@@ -27,11 +40,11 @@
 Update the `backend/.env` file with your MongoDB connection string:
 
 ```env
-# For local MongoDB
-MONGODB_URI=mongodb://localhost:27017/women-safety-app
-
 # For MongoDB Atlas (example)
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/women-safety-app
+
+# For local MongoDB
+MONGODB_URI=mongodb://localhost:27017/women-safety-app
 
 # Change JWT secret for production
 JWT_SECRET=your-super-secure-secret-key-here
@@ -114,16 +127,46 @@ npm run dev
 - CORS protection
 - Helmet security headers
 
+## Database Schema
+
+### Users Collection
+- Authentication and profile information
+- Role-based access (woman/volunteer)
+- Location data for volunteers
+- Emergency statistics
+
+### Emergency Alerts Collection
+- Emergency incident details
+- Location coordinates
+- User information
+- Media files
+- Volunteer responses
+- Timeline tracking
+
+## File Storage
+
+### Media Files (Videos, Audio, Images)
+- Emergency recordings are stored in the `uploads/emergency/` directory
+- Files are automatically cleaned up after 30 days (configurable)
+- Each file is associated with an emergency alert in the database
+
+### Storage Configuration
+- Maximum file size: 50MB per file
+- Supported formats: MP4, WebM, MP3, WAV, JPEG, PNG
+- Files are stored with unique names to prevent conflicts
+
 ## Troubleshooting
 
 ### MongoDB Connection Issues
 - Ensure MongoDB is running
 - Check the connection string in `.env`
 - Verify network connectivity for Atlas
+- Check MongoDB logs for error details
 
 ### Permission Issues
 - Allow location access in browser
 - Allow camera/microphone permissions for recording
+- Check file system permissions for upload directory
 
 ### Port Conflicts
 - Change ports in configuration if 3000 or 5173 are in use
@@ -145,6 +188,12 @@ FRONTEND_URL=https://your-domain.com
 - Configure proper CORS settings
 - Set up rate limiting
 - Enable MongoDB authentication
+- Regular database backups
+
+### File Storage in Production
+- Consider using cloud storage (AWS S3, Google Cloud Storage) for media files
+- Implement CDN for faster file delivery
+- Set up automated backup for uploaded files
 
 ## API Documentation
 
@@ -159,22 +208,6 @@ FRONTEND_URL=https://your-domain.com
 - `POST /api/emergency/accept/:alertId` - Accept alert (volunteers)
 - `POST /api/emergency/reject/:alertId` - Decline alert (volunteers)
 - `POST /api/emergency/upload-video` - Upload emergency recording
-
-## Database Schema
-
-### Users Collection
-- Authentication and profile information
-- Role-based access (woman/volunteer)
-- Location data for volunteers
-- Emergency statistics
-
-### Emergency Alerts Collection
-- Emergency incident details
-- Location coordinates
-- User information
-- Media files
-- Volunteer responses
-- Timeline tracking
 
 ## Support
 

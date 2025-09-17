@@ -117,33 +117,59 @@ app.use('*', (req, res) => {
 })
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/women-safety-app', {
+const mongooseUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/women-safety-app'
+
+mongoose.connect(mongooseUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => {
   console.log('✅ Connected to MongoDB')
+  console.log(`🔗 Database: ${mongooseUri.includes('mongodb.net') ? 'MongoDB Atlas (Cloud)' : 'Local MongoDB'}`)
 })
 .catch((error) => {
   console.error('❌ MongoDB connection error:', error.message)
   console.log('\n📋 Setup Instructions:')
-  console.log('1. Install MongoDB Community Server')
-  console.log('2. Start MongoDB service')
-  console.log('3. Or use MongoDB Atlas (cloud)')
-  console.log('4. Check SETUP.md for detailed instructions\n')
+  console.log('1. MongoDB Atlas (Cloud - Recommended):')
+  console.log('   - Go to https://www.mongodb.com/atlas')
+  console.log('   - Create a free account and cluster')
+  console.log('   - Get your connection string')
+  console.log('   - Replace the MONGODB_URI in backend/.env')
+  console.log('')
+  console.log('2. Local MongoDB Installation:')
+  console.log('   - Download MongoDB Community Server from https://www.mongodb.com/try/download/community')
+  console.log('   - Install MongoDB following platform-specific instructions')
+  console.log('   - Start MongoDB service')
+  console.log('')
+  console.log('3. For immediate testing (limited functionality):')
+  console.log('   - The app will continue running with in-memory storage')
+  console.log('   - Some features may be limited without MongoDB')
+  console.log('   - Check SETUP.md for detailed instructions\n')
   
   // Don't exit in development, allow testing without DB
   if (process.env.NODE_ENV === 'production') {
+    console.log('⚠️  Production mode: Exiting due to database connection failure')
     process.exit(1)
+  } else {
+    console.log('⚠️  Development mode: Running with in-memory storage fallback')
+    console.log('   Some features may be limited without MongoDB')
   }
 })
 
 const PORT = process.env.PORT || 3000
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-  console.log(`Environment: ${process.env.NODE_ENV}`)
-  console.log(`Frontend URL: ${process.env.FRONTEND_URL}`)
+  console.log(`🚀 Server running on port ${PORT}`)
+  console.log(`🌍 Environment: ${process.env.NODE_ENV}`)
+  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL}`)
+  console.log(`📡 Socket.IO: Enabled`)
+  
+  // Check database connection status
+  if (mongoose.connection.readyState === 1) {
+    console.log('💾 Database: Connected to MongoDB')
+  } else {
+    console.log('💾 Database: Using in-memory storage (limited functionality)')
+  }
 })
 
 // Export for testing
